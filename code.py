@@ -7,8 +7,12 @@ import pandas as pd
 def getTime(h, m, s, ms):
     return h * 3600 + m * 60 + s + ms * (10 ** -6)
 
+# These are used for input calculations ------
 time = []
 v_acc = []
+# These are for temporary storage ------
+t = []
+v = []
 
 found = 0
 first = 1
@@ -21,18 +25,42 @@ for i in range(1,2803):
         for row in plots:
             if(first):
                 start = getTime(int(row[0]), int(row[1]), int(row[2]), float(row[3]))
-                time.append(0)
-                v_acc.append(float(row[5]))
+                t.append(0)
+                v.append(float(row[5]))
                 first = 0
             else:
-                time.append(round(getTime(int(row[0]), int(row[1]), int(row[2]), float(row[3])) - start, 6))
-                v_acc.append(float(row[5]))
+                t.append(round(getTime(int(row[0]), int(row[1]), int(row[2]), float(row[3])) - start, 6))
+                v.append(float(row[5]))
                 if(abs(float(row[5])) > 20):
                     # print(zero_filled + "cmkdmcksk")
                     found = 1
                     break
     if(found):
         break
+
+# Shrinking the data from t and v to time and v_acc
+shrinkBy = 100
+itr = int(len(t) / shrinkBy)
+remainingEle = len(t) % shrinkBy 
+# print("Remaining elements: ",remainingEle)
+for i in range(itr):
+    startIndex = i * shrinkBy
+    endIndex = startIndex + shrinkBy
+    time.append(np.mean(t[startIndex:endIndex]))
+    maxEle = 0
+    for j in range(startIndex, endIndex):
+        if(abs(v[i]) > abs(maxEle)):
+            maxEle = v[i]
+    v_acc.append(maxEle)
+# For remaining elements if any
+if (remainingEle > 0):
+    time.append(np.mean(t[itr * shrinkBy : ]))
+    maxEle = 0
+    for j in range(itr * shrinkBy, len(v)):
+        if(abs(v[j]) > abs(maxEle)):
+            maxEle = v[j]
+    v_acc.append(maxEle)
+# print("Max acc: ", v_acc[-1])
 
 window_size = 100
 
