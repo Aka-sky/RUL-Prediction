@@ -133,7 +133,7 @@ def split_x_y(life_time, time, weibull_RMS, weibull_Kurt):
 
 ######################################### Condition 1 ###########################################
 #---------------------------------------Loading Bearings---------------------------------------
-print('Condition 1: \n')
+print('\nCondition 1: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=1, bearing=1, filelength=2803)
 time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
@@ -188,35 +188,14 @@ regressor_1 = Sequential()
 regressor_1.add(Dense(input_dim=6, output_dim=2, activation='sigmoid', init='uniform'))
 regressor_1.add(Dense(output_dim=1, activation='relu', init='uniform'))
 regressor_1.compile(optimizer='adam', loss='mean_absolute_percentage_error')
-regressor_1.fit(X_train1_1, Y_train1_1, batch_size=1000, epochs=100)
+regressor_1.fit(X_train1_1, Y_train1_1, batch_size=1000, epochs=1000)
 print('C1B1: Model Trained')
-regressor_1.fit(X_train1_2, Y_train1_2, batch_size=1000, epochs=100)
+regressor_1.fit(X_train1_2, Y_train1_2, batch_size=1000, epochs=1000)
 print('C1B2: Model Trained')
-
-Y_pred1_3 = regressor_1.predict(X_test1_3)
-mean_percent_error = np.mean((abs(Y_pred1_3.flatten() - Y_test1_3) / Y_test1_3) * 100)
-print('Test B13 Mean Error: ',mean_percent_error,'%')
-
-#Y_pred1_4 = regressor.predict(X_test1_4)
-#mean_percent_error = np.mean((abs(Y_pred1_4.flatten() - Y_test1_4) / Y_test1_4) * 100)
-#print('Test B14 Mean Error: ',mean_percent_error,'%')
-
-Y_pred1_5 = regressor_1.predict(X_test1_5)
-mean_percent_error = np.mean((abs(Y_pred1_5.flatten() - Y_test1_5) / Y_test1_5) * 100)
-print('Test B15 Mean Error: ',mean_percent_error,'%')
-
-Y_pred1_6 = regressor_1.predict(X_test1_6)
-mean_percent_error = np.mean((abs(Y_pred1_6.flatten() - Y_test1_6) / Y_test1_6) * 100)
-print('Test B16 Mean Error: ',mean_percent_error,'%')
-
-Y_pred1_7 = regressor_1.predict(X_test1_7)
-mean_percent_error = np.mean((abs(Y_pred1_7.flatten() - Y_test1_7) / Y_test1_7) * 100)
-print('Test B17 Mean Error: ',mean_percent_error,'%')
-
 
 ######################################### Condition 2 ###########################################
 #---------------------------------------Loading Bearings---------------------------------------
-print('Condition 2: \n')
+print('\nCondition 2: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=2, bearing=1, filelength=911)
 time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
@@ -276,30 +255,9 @@ print('C2B1: Model Trained')
 regressor_2.fit(X_train2_2, Y_train2_2, batch_size=1000, epochs=1000)
 print('C2B2: Model Trained')
 
-Y_pred2_3 = regressor_2.predict(X_test2_3)
-mean_percent_error = np.mean((abs(Y_pred2_3.flatten() - Y_test2_3) / Y_test2_3) * 100)
-print('Test B13 Mean Error: ',mean_percent_error,'%')
-
-Y_pred2_4 = regressor_2.predict(X_test2_4)
-mean_percent_error = np.mean((abs(Y_pred2_4.flatten() - Y_test2_4) / Y_test2_4) * 100)
-print('Test B14 Mean Error: ',mean_percent_error,'%')
-
-Y_pred2_5 = regressor_2.predict(X_test2_5)
-mean_percent_error = np.mean((abs(Y_pred2_5.flatten() - Y_test2_5) / Y_test2_5) * 100)
-print('Test B15 Mean Error: ',mean_percent_error,'%')
-
-Y_pred2_6 = regressor_2.predict(X_test2_6)
-mean_percent_error = np.mean((abs(Y_pred2_6.flatten() - Y_test2_6) / Y_test2_6) * 100)
-print('Test B16 Mean Error: ',mean_percent_error,'%')
-
-Y_pred2_7 = regressor_2.predict(X_test2_7)
-mean_percent_error = np.mean((abs(Y_pred2_7.flatten() - Y_test2_7) / Y_test2_7) * 100)
-print('Test B17 Mean Error: ',mean_percent_error,'%')
-
-
 ######################################### Condition 3 ###########################################
 #---------------------------------------Loading Bearings---------------------------------------
-print('Condition 3: \n')
+print('\nCondition 3: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=3, bearing=1, filelength=515)
 time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
@@ -335,172 +293,55 @@ print('C3B1: Model Trained')
 regressor_3.fit(X_train3_2, Y_train3_2, batch_size=1000, epochs=1000)
 print('C3B2: Model Trained')
 
-Y_pred3_3 = regressor_3.predict(X_test3_3)
-mean_percent_error = np.mean((abs(Y_pred3_3.flatten() - Y_test3_3) / Y_test3_3) * 100)
-print('Test B13 Mean Error: ',mean_percent_error,'%')
+#########################################--Predictions--##########################################
 
-#---------------------------------------Our ANN Model---------------------------------------------
-"""
-EPSILON = 10 ** -8
+#-----------------------------------------Condition 1---------------------------------------------
+print('\nCondition 1: \n')
 
-def initialize_parameters(layer_dims):
-    parameters = {}
-    L = len(layer_dims)     # no. of layers including hidden & o/p layer
-
-    for l in range(1, L):
-        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l - 1]) * 0.01
-        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
-
-    return parameters
-
-def relu(Z):
-    return np.maximum(Z, 0)
-    
-def sigmoid(z):
-    s = 1/(1+np.exp(-z))
-    return s
-
-def softmax(z):
-    z = np.exp(z-np.max(z, axis=0))
-    return z / z.sum(axis=0)
-
-def relu_backward(dAL, Z):
-    Z[Z < 0] = 0
-    Z[Z >= 0] = 1
-    dZ = np.multiply(dAL, Z)
-    return dZ
-
-def sigmoid_backward(dAL, Z):
-    dZ = np.multiply(dAL, sigmoid(Z), 1-sigmoid(Z))
-    return dZ
-
-def softmax_backward(dAL, AL):
-    dZ = np.multiply(dAL, AL, 1-AL)
-    return dZ
-
-def compute_cost(AL, Y):
-    # cost = -np.sum(Y * np.log(AL + EPSILON))
-    cost = np.mean((AL-Y)**2) / 2
-    return cost
-
-def activation_forward(A, W, b, activation_type):
-    Z = np.dot(W, A) + b 
-    linear_cache = (A, W, b)
-
-    if activation_type == 'sigmoid':
-        A = sigmoid(Z)
-    elif activation_type == 'softmax':
-        A = softmax(Z)
-    elif activation_type == 'relu':
-        A = relu(Z)
-    
-    activation_cache = Z
-    cache = (linear_cache, activation_cache)
-    return A, cache
-
-
-def forward_propagation(X, parameters):
-    caches = []
-    A = X
-    L = len(parameters) // 2    # no. of layers
-    for l in range(1, L):
-        A_prev = A
-        A, cache = activation_forward(A_prev, parameters['W'+str(l)], parameters['b'+str(l)], "sigmoid")
-        caches.append(cache)
-    AL, cache = activation_forward(A, parameters['W'+str(L)], parameters['b'+str(L)], "relu")
-    caches.append(cache)
-    return AL, caches
-
-def linear_backward(dZ, cache):
-    A_prev, W, b = cache
-    m = A_prev.shape[1]
-    dW = np.dot(dZ, A_prev.T) / m
-    db = np.sum(dZ, axis=1, keepdims=True) / m
-    dA_prev = np.dot(W.T, dZ)
-    return dA_prev, dW, db
-
-
-def backward_propagation(AL, Y, caches):
-    grads = {}
-    L = len(caches)
-    current_cache = caches[L-1]
-    dZ = AL - Y
-    grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(dZ, current_cache[0])
-    for l in reversed(range(L-1)):
-        current_cache = caches[l]   
-        dZ = linear_backward(grads["dA"+str(l+1)], current_cache[1])
-        dA_prev_temp, dW_temp, db_temp = sigmoid_backward(dZ, current_cache[0]) 
-        grads["dA" + str(l)] = dA_prev_temp
-        grads["dW" + str(l + 1)] = dW_temp
-        grads["db" + str(l + 1)] = db_temp
-    return grads
-
-def update_parameters(parameters, grads, learning_rate):
-    L = len(parameters) // 2 
-    for l in range(L):
-        parameters["W" + str(l+1)] -= learning_rate*grads["dW"+str(l+1)]
-        parameters["b" + str(l+1)] -= learning_rate*grads["db"+str(l+1)]
-    return parameters
-    
-def plot_cost(costs):
-    # Plot learning curve (with costs)
-    costs = np.squeeze(costs)
-    plt.plot(costs)
-    plt.ylabel('cost')
-    plt.xlabel('iterations (per hundreds)')
-    plt.title("Training Plot")
-    plt.show()
-
-class ANN:
-    layer_dims = []
-    learning_rate=0.0075
-    batch_size=1000
-    num_iterations=1000
-    parameters = {}
-    
-    def __init__(self, layer_dims, learning_rate=0.0075, batch_size=1000, num_iterations=3000):
-        self.layer_dims = layer_dims
-        self.learning_rate = learning_rate
-        self.batch_size = batch_size
-        self.num_iterations  = num_iterations
-    
-    def fit(self, X, Y, print_cost=True):
-        costs = []
-        Y = Y.reshape(-1,1)
-    
-        self.parameters = initialize_parameters(self.layer_dims)
-    
-        batches = [(X[:, i:i + self.batch_size], Y[:, i:i + self.batch_size])
-                       for i in range(0, X.shape[1], self.batch_size)]
-    
-        # Gradient descent
-        for i in range(self.num_iterations):
-        
-            for x_, y_ in batches:
-    
-                AL, caches = forward_propagation(x_, self.parameters)
-    
-                cost = compute_cost(AL, y_)
-    
-                grads = backward_propagation(AL, y_, caches)
-    
-                self.parameters = update_parameters(self.parameters, grads, self.learning_rate)
-    
-            if print_cost and i % 1 == 0:
-                print ("Iteration : {} Cost : {}".format(i, cost), sep='\t')
-                costs.append(cost)
-    
-        return costs
-    
-    
-    def predict(self, X):
-        AL, _ = forward_propagation(X, self.parameters)
-        predictions = np.argmax(AL, axis=0)
-        return predictions
-
-ann = ANN(layer_dims = [6, 2, 1], learning_rate=0.0075, batch_size=1000, num_iterations=1000)
-costs = ann.fit(X_train1_1, Y_train1_1)
-Y_pred1_3 = ann.predict(X_test1_3)
+Y_pred1_3 = regressor_1.predict(X_test1_3)
 mean_percent_error = np.mean((abs(Y_pred1_3.flatten() - Y_test1_3) / Y_test1_3) * 100)
 print('Test B13 Mean Error: ',mean_percent_error,'%')
-"""
+
+#Y_pred1_4 = regressor.predict(X_test1_4)
+#mean_percent_error = np.mean((abs(Y_pred1_4.flatten() - Y_test1_4) / Y_test1_4) * 100)
+#print('Test B14 Mean Error: ',mean_percent_error,'%')
+
+Y_pred1_5 = regressor_1.predict(X_test1_5)
+mean_percent_error = np.mean((abs(Y_pred1_5.flatten() - Y_test1_5) / Y_test1_5) * 100)
+print('Test B15 Mean Error: ',mean_percent_error,'%')
+
+Y_pred1_6 = regressor_1.predict(X_test1_6)
+mean_percent_error = np.mean((abs(Y_pred1_6.flatten() - Y_test1_6) / Y_test1_6) * 100)
+print('Test B16 Mean Error: ',mean_percent_error,'%')
+
+Y_pred1_7 = regressor_1.predict(X_test1_7)
+mean_percent_error = np.mean((abs(Y_pred1_7.flatten() - Y_test1_7) / Y_test1_7) * 100)
+print('Test B17 Mean Error: ',mean_percent_error,'%')
+
+print('\nCondition 2: \n')
+
+Y_pred2_3 = regressor_2.predict(X_test2_3)
+mean_percent_error = np.mean((abs(Y_pred2_3.flatten() - Y_test2_3) / Y_test2_3) * 100)
+print('Test B23 Mean Error: ',mean_percent_error,'%')
+
+Y_pred2_4 = regressor_2.predict(X_test2_4)
+mean_percent_error = np.mean((abs(Y_pred2_4.flatten() - Y_test2_4) / Y_test2_4) * 100)
+print('Test B24 Mean Error: ',mean_percent_error,'%')
+
+Y_pred2_5 = regressor_2.predict(X_test2_5)
+mean_percent_error = np.mean((abs(Y_pred2_5.flatten() - Y_test2_5) / Y_test2_5) * 100)
+print('Test B25 Mean Error: ',mean_percent_error,'%')
+
+Y_pred2_6 = regressor_2.predict(X_test2_6)
+mean_percent_error = np.mean((abs(Y_pred2_6.flatten() - Y_test2_6) / Y_test2_6) * 100)
+print('Test B26 Mean Error: ',mean_percent_error,'%')
+
+Y_pred2_7 = regressor_2.predict(X_test2_7)
+mean_percent_error = np.mean((abs(Y_pred2_7.flatten() - Y_test2_7) / Y_test2_7) * 100)
+print('Test B27 Mean Error: ',mean_percent_error,'%')
+
+print('\nCondition 3: \n')
+
+Y_pred3_3 = regressor_3.predict(X_test3_3)
+mean_percent_error = np.mean((abs(Y_pred3_3.flatten() - Y_test3_3) / Y_test3_3) * 100)
+print('Test B33 Mean Error: ',mean_percent_error,'%')
