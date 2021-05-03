@@ -73,7 +73,7 @@ def load_data(learning, condition, bearing, filelength, shrinkBy = 100):
         life_time = time[-1]
     return time, v_acc, life_time
 
-def preprocess_dataset(time, v_acc, life_time, window_size=100):
+def preprocess_dataset(time, v_acc, window_size=100):
     # rolling rms -------------------
     rolling_rms = pd.Series(v_acc).pow(2).rolling(window_size).apply(lambda x: np.sqrt(x.mean()))
     rolling_rms = rolling_rms.dropna()   
@@ -136,18 +136,19 @@ def split_x_y(life_time, time, weibull_RMS, weibull_Kurt):
 print('\nCondition 1: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=1, bearing=1, filelength=2803)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train1_1, Y_train1_1 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C1B1: Train Dataset Loaded')
 
 time, v_acc, life_time = load_data(learning=True, condition=1, bearing=2, filelength=871)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train1_2, Y_train1_2 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C1B2: Train Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=1, bearing=3, filelength=2375)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test1_3, Y_test1_3 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time1_3 = load_data(learning=False, condition=1, bearing=3, filelength=2375)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time1_3 += 5730   #Actual RUL from Challenge Details pdf
+X_test1_3, Y_test1_3 = split_x_y(life_time1_3, time, weibull_RMS, weibull_Kurt)
 print('C1B3: Test Dataset Loaded')
 
 #time, v_acc, life_time = load_data(learning=False, condition=1, bearing=4, filelength=1428)
@@ -155,19 +156,22 @@ print('C1B3: Test Dataset Loaded')
 #X_test1_4, Y_test1_4 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 #print('C1B4: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=1, bearing=5, filelength=2463)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test1_5, Y_test1_5 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time1_5 = load_data(learning=False, condition=1, bearing=5, filelength=2463)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time1_5 += 1610   #Actual RUL from Challenge Details pdf
+X_test1_5, Y_test1_5 = split_x_y(life_time1_5, time, weibull_RMS, weibull_Kurt)
 print('C1B5: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=1, bearing=6, filelength=2448)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test1_6, Y_test1_6 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time1_6 = load_data(learning=False, condition=1, bearing=6, filelength=2448)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time1_6 += 1460  #Actual RUL from Challenge Details pdf
+X_test1_6, Y_test1_6 = split_x_y(life_time1_6, time, weibull_RMS, weibull_Kurt)
 print('C1B6: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=1, bearing=7, filelength=2259)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test1_7, Y_test1_7 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time1_7 = load_data(learning=False, condition=1, bearing=7, filelength=2259)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time1_7 += 7570   #Actual RUL from Challenge Details pdf
+X_test1_7, Y_test1_7 = split_x_y(life_time1_7, time, weibull_RMS, weibull_Kurt)
 print('C1B7: Test Dataset Loaded')
 
 #-----------------------------------------Feature Scaling-----------------------------------------
@@ -188,9 +192,9 @@ regressor_1 = Sequential()
 regressor_1.add(Dense(input_dim=6, output_dim=2, activation='sigmoid', init='uniform'))
 regressor_1.add(Dense(output_dim=1, activation='relu', init='uniform'))
 regressor_1.compile(optimizer='adam', loss='mean_absolute_percentage_error')
-regressor_1.fit(X_train1_1, Y_train1_1, batch_size=1000, epochs=1000)
+regressor_1.fit(X_train1_1, Y_train1_1, batch_size=1000, epochs=100)
 print('C1B1: Model Trained')
-regressor_1.fit(X_train1_2, Y_train1_2, batch_size=1000, epochs=1000)
+regressor_1.fit(X_train1_2, Y_train1_2, batch_size=1000, epochs=100)
 print('C1B2: Model Trained')
 
 ######################################### Condition 2 ###########################################
@@ -198,38 +202,43 @@ print('C1B2: Model Trained')
 print('\nCondition 2: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=2, bearing=1, filelength=911)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train2_1, Y_train2_1 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C2B1: Train Dataset Loaded')
 
 time, v_acc, life_time = load_data(learning=True, condition=2, bearing=2, filelength=797)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train2_2, Y_train2_2 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C2B2: Train Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=2, bearing=3, filelength=1955)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test2_3, Y_test2_3 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time2_3 = load_data(learning=False, condition=2, bearing=3, filelength=1955)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time2_3 += 7530   #Actual RUL from Challenge Details pdf
+X_test2_3, Y_test2_3 = split_x_y(life_time2_3, time, weibull_RMS, weibull_Kurt)
 print('C2B3: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=2, bearing=4, filelength=751)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test2_4, Y_test2_4 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time2_4 = load_data(learning=False, condition=2, bearing=4, filelength=751)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time2_4 += 1390   #Actual RUL from Challenge Details pdf
+X_test2_4, Y_test2_4 = split_x_y(life_time2_4, time, weibull_RMS, weibull_Kurt)
 print('C2B4: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=2, bearing=5, filelength=2311)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test2_5, Y_test2_5 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time2_5 = load_data(learning=False, condition=2, bearing=5, filelength=2311)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time2_5 += 3090   #Actual RUL from Challenge Details pdf
+X_test2_5, Y_test2_5 = split_x_y(life_time2_5, time, weibull_RMS, weibull_Kurt)
 print('C2B5: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=2, bearing=6, filelength=701)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test2_6, Y_test2_6 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time2_6 = load_data(learning=False, condition=2, bearing=6, filelength=701)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time2_6 += 1290   #Actual RUL from Challenge Details pdf
+X_test2_6, Y_test2_6 = split_x_y(life_time2_6, time, weibull_RMS, weibull_Kurt)
 print('C2B6: Test Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=2, bearing=7, filelength=230)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test2_7, Y_test2_7 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time2_7 = load_data(learning=False, condition=2, bearing=7, filelength=230)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time2_7 += 580   #Actual RUL from Challenge Details pdf
+X_test2_7, Y_test2_7 = split_x_y(life_time2_7, time, weibull_RMS, weibull_Kurt)
 print('C2B7: Test Dataset Loaded')
 
 #-----------------------------------------Feature Scaling-----------------------------------------
@@ -250,9 +259,9 @@ regressor_2 = Sequential()
 regressor_2.add(Dense(input_dim=6, output_dim=2, activation='sigmoid', init='uniform'))
 regressor_2.add(Dense(output_dim=1, activation='relu', init='uniform'))
 regressor_2.compile(optimizer='adam', loss='mean_absolute_percentage_error')
-regressor_2.fit(X_train2_1, Y_train2_1, batch_size=1000, epochs=1000)
+regressor_2.fit(X_train2_1, Y_train2_1, batch_size=1000, epochs=100)
 print('C2B1: Model Trained')
-regressor_2.fit(X_train2_2, Y_train2_2, batch_size=1000, epochs=1000)
+regressor_2.fit(X_train2_2, Y_train2_2, batch_size=1000, epochs=100)
 print('C2B2: Model Trained')
 
 ######################################### Condition 3 ###########################################
@@ -260,18 +269,19 @@ print('C2B2: Model Trained')
 print('\nCondition 3: \n')
 
 time, v_acc, life_time = load_data(learning=True, condition=3, bearing=1, filelength=515)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train3_1, Y_train3_1 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C3B1: Train Dataset Loaded')
 
 time, v_acc, life_time = load_data(learning=True, condition=3, bearing=2, filelength=1637)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
 X_train3_2, Y_train3_2 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
 print('C3B2: Train Dataset Loaded')
 
-time, v_acc, life_time = load_data(learning=False, condition=3, bearing=3, filelength=434)
-time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc, life_time) 
-X_test3_3, Y_test3_3 = split_x_y(life_time, time, weibull_RMS, weibull_Kurt)
+time, v_acc, life_time3_3 = load_data(learning=False, condition=3, bearing=3, filelength=434)
+time, weibull_RMS, weibull_Kurt = preprocess_dataset(time, v_acc) 
+life_time3_3 += 820	#Actual RUL from Challenge Details pdf
+X_test3_3, Y_test3_3 = split_x_y(life_time3_3, time, weibull_RMS, weibull_Kurt)
 print('C3B3: Test Dataset Loaded')
 
 #-----------------------------------------Feature Scaling-----------------------------------------
@@ -288,18 +298,22 @@ regressor_3 = Sequential()
 regressor_3.add(Dense(input_dim=6, output_dim=2, activation='sigmoid', init='uniform'))
 regressor_3.add(Dense(output_dim=1, activation='relu', init='uniform'))
 regressor_3.compile(optimizer='adam', loss='mean_absolute_percentage_error')
-regressor_3.fit(X_train3_1, Y_train3_1, batch_size=1000, epochs=1000)
+regressor_3.fit(X_train3_1, Y_train3_1, batch_size=1000, epochs=100)
 print('C3B1: Model Trained')
-regressor_3.fit(X_train3_2, Y_train3_2, batch_size=1000, epochs=1000)
+regressor_3.fit(X_train3_2, Y_train3_2, batch_size=1000, epochs=100)
 print('C3B2: Model Trained')
 
 #########################################--Predictions--##########################################
 
 #-----------------------------------------Condition 1---------------------------------------------
-print('\nCondition 1: \n')
+print('\nCondition 1:')
 
 Y_pred1_3 = regressor_1.predict(X_test1_3)
 mean_percent_error = np.mean((abs(Y_pred1_3.flatten() - Y_test1_3) / Y_test1_3) * 100)
+predicted_RUL = (1-Y_pred1_3[-1])[0]*life_time1_3
+actual_RUL = (1-Y_test1_3[-1])*life_time1_3
+print('\nB13 Predicted RUL: ',predicted_RUL,'s')
+print('B13 Actual RUL: ',actual_RUL,'s')
 print('Test B13 Mean Error: ',mean_percent_error,'%')
 
 #Y_pred1_4 = regressor.predict(X_test1_4)
@@ -308,40 +322,166 @@ print('Test B13 Mean Error: ',mean_percent_error,'%')
 
 Y_pred1_5 = regressor_1.predict(X_test1_5)
 mean_percent_error = np.mean((abs(Y_pred1_5.flatten() - Y_test1_5) / Y_test1_5) * 100)
+predicted_RUL = (1-Y_pred1_5[-1])[0]*life_time1_5
+actual_RUL = (1-Y_test1_5[-1])*life_time1_5
+print('\nB15 Predicted RUL: ',predicted_RUL,'s')
+print('B15 Actual RUL: ',actual_RUL,'s')
 print('Test B15 Mean Error: ',mean_percent_error,'%')
 
 Y_pred1_6 = regressor_1.predict(X_test1_6)
 mean_percent_error = np.mean((abs(Y_pred1_6.flatten() - Y_test1_6) / Y_test1_6) * 100)
+predicted_RUL = (1-Y_pred1_6[-1])[0]*life_time1_6
+actual_RUL = (1-Y_test1_6[-1])*life_time1_6
+print('\nB16 Predicted RUL: ',predicted_RUL,'s')
+print('B16 Actual RUL: ',actual_RUL,'s')
 print('Test B16 Mean Error: ',mean_percent_error,'%')
 
 Y_pred1_7 = regressor_1.predict(X_test1_7)
 mean_percent_error = np.mean((abs(Y_pred1_7.flatten() - Y_test1_7) / Y_test1_7) * 100)
+predicted_RUL = (1-Y_pred1_7[-1])[0]*life_time1_7
+actual_RUL = (1-Y_test1_7[-1])*life_time1_7
+print('\nB17 Predicted RUL: ',predicted_RUL,'s')
+print('B17 Actual RUL: ',actual_RUL,'s')
 print('Test B17 Mean Error: ',mean_percent_error,'%')
 
-print('\nCondition 2: \n')
+print('\nCondition 2:')
 
 Y_pred2_3 = regressor_2.predict(X_test2_3)
 mean_percent_error = np.mean((abs(Y_pred2_3.flatten() - Y_test2_3) / Y_test2_3) * 100)
+predicted_RUL = (1-Y_pred2_3[-1])[0]*life_time2_3
+actual_RUL = (1-Y_test2_3[-1])*life_time2_3
+print('\nB23 Predicted RUL: ',predicted_RUL,'s')
+print('B23 Actual RUL: ',actual_RUL,'s')
 print('Test B23 Mean Error: ',mean_percent_error,'%')
 
 Y_pred2_4 = regressor_2.predict(X_test2_4)
 mean_percent_error = np.mean((abs(Y_pred2_4.flatten() - Y_test2_4) / Y_test2_4) * 100)
+predicted_RUL = (1-Y_pred2_4[-1])[0]*life_time2_4
+actual_RUL = (1-Y_test2_4[-1])*life_time2_4
+print('\nB24 Predicted RUL: ',predicted_RUL,'s')
+print('B24 Actual RUL: ',actual_RUL,'s')
 print('Test B24 Mean Error: ',mean_percent_error,'%')
 
 Y_pred2_5 = regressor_2.predict(X_test2_5)
 mean_percent_error = np.mean((abs(Y_pred2_5.flatten() - Y_test2_5) / Y_test2_5) * 100)
+predicted_RUL = (1-Y_pred2_5[-1])[0]*life_time2_5
+actual_RUL = (1-Y_test2_5[-1])*life_time2_5
+print('\nB25 Predicted RUL: ',predicted_RUL,'s')
+print('B25 Actual RUL: ',actual_RUL,'s')
 print('Test B25 Mean Error: ',mean_percent_error,'%')
 
 Y_pred2_6 = regressor_2.predict(X_test2_6)
 mean_percent_error = np.mean((abs(Y_pred2_6.flatten() - Y_test2_6) / Y_test2_6) * 100)
+predicted_RUL = (1-Y_pred2_6[-1])[0]*life_time2_6
+actual_RUL = (1-Y_test2_6[-1])*life_time2_6
+print('\nB26 Predicted RUL: ',predicted_RUL,'s')
+print('B26 Actual RUL: ',actual_RUL,'s')
 print('Test B26 Mean Error: ',mean_percent_error,'%')
 
 Y_pred2_7 = regressor_2.predict(X_test2_7)
 mean_percent_error = np.mean((abs(Y_pred2_7.flatten() - Y_test2_7) / Y_test2_7) * 100)
+predicted_RUL = (1-Y_pred2_7[-1])[0]*life_time2_7
+actual_RUL = (1-Y_test2_7[-1])*life_time2_7
+print('\nB27 Predicted RUL: ',predicted_RUL,'s')
+print('B27 Actual RUL: ',actual_RUL,'s')
 print('Test B27 Mean Error: ',mean_percent_error,'%')
 
-print('\nCondition 3: \n')
+print('\nCondition 3:')
 
 Y_pred3_3 = regressor_3.predict(X_test3_3)
 mean_percent_error = np.mean((abs(Y_pred3_3.flatten() - Y_test3_3) / Y_test3_3) * 100)
-print('Test B33 Mean Error: ',mean_percent_error,'%')
+predicted_RUL = (1-Y_pred3_3[-1])[0]*life_time3_3
+actual_RUL = (1-Y_test3_3[-1])*life_time3_3
+print('\nB33 Predicted RUL: ',predicted_RUL,'s')
+print('B33 Actual RUL: ',actual_RUL,'s')
+print('Test B33 Mean Error: ',mean_percent_error,'%\n')
+
+time = [i for i in range(Y_test1_3.shape[0])]
+plt.plot(time,Y_test1_3)
+plt.plot(time,Y_pred1_3)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing1_3')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test1_5.shape[0])]
+plt.plot(time,Y_test1_5)
+plt.plot(time,Y_pred1_5)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing1_5')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test1_6.shape[0])]
+plt.plot(time,Y_test1_6)
+plt.plot(time,Y_pred1_6)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing1_6')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test1_7.shape[0])]
+plt.plot(time,Y_test1_7)
+plt.plot(time,Y_pred1_7)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing1_7')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test2_3.shape[0])]
+plt.plot(time,Y_test2_3)
+plt.plot(time,Y_pred2_3)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing2_3')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test2_4.shape[0])]
+plt.plot(time,Y_test2_4)
+plt.plot(time,Y_pred2_4)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing2_4')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test2_5.shape[0])]
+plt.plot(time,Y_test2_5)
+plt.plot(time,Y_pred2_5)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing2_5')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test2_6.shape[0])]
+plt.plot(time,Y_test2_6)
+plt.plot(time,Y_pred2_6)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing2_6')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test2_7.shape[0])]
+plt.plot(time,Y_test2_7)
+plt.plot(time,Y_pred2_7)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing2_7')
+plt.legend(['Actual','Predicted'])
+plt.show()
+
+time = [i for i in range(Y_test3_3.shape[0])]
+plt.plot(time,Y_test3_3)
+plt.plot(time,Y_pred3_3)
+plt.xlabel('Time in sec')
+plt.ylabel('Output')
+plt.title('For Bearing3_3')
+plt.legend(['Actual','Predicted'])
+plt.show()
